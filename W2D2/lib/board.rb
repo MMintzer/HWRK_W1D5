@@ -3,14 +3,18 @@ class Board
   attr_accessor :cups
   VALID_MOVES = [1,2,3,4,5,7,8,9,10,11,12,14]
   def initialize(name1, name2)
+    @name1 = name1
+    @name2 = name2
     @cups = Array.new(14) { [] }
     place_stones
+
   end
 
 
   def place_stones
     @cups.each_with_index do |cup, idx|
-      4.times do cup << :stone unless idx == 6 || idx == 13
+      next if idx == 6 || idx == 13
+      4.times do cup << :stone
       end
     end
   end
@@ -18,22 +22,40 @@ class Board
 
   def valid_move?(start_pos)
     raise "Invalid starting cup" unless VALID_MOVES.include?(start_pos)
+    raise "Invalid starting cup" if cups[start_pos].empty?
   end
 
   def make_move(start_pos, current_player_name)
-      cups[start_pos] = []
-      stones_in_cup = cups[start_pos].length
-      stones_in_cup.times do |x|
-        start_pos += 1
-        cups[(start_pos % 14)] << :stone
-      end
-      # render
-      # next_turn(start_pos)
+    stones = cups[start_pos]
+    cups[start_pos] = []
 
+
+    cup_idx = start_pos
+    until stones.empty?
+      cup_idx += 1
+      cup_idx = 0 if cup_idx > 13
+
+      if cup_idx == 6
+        @cups[6] << stones.pop if current_player_name == @name1
+      elsif cup_idx == 13
+        @cups[13] << stones.pop if current_player_name == @name2
+      else
+        @cups[cup_idx] << stones.pop
+      end
+    end
+
+    render
+    next_turn(cup_idx)
   end
 
   def next_turn(ending_cup_idx)
-    # helper method to determine what #make_move returns
+    if ending_cup_idx == 6 || ending_cup_idx == 13
+      :prompt
+    elsif @cups[ending_cup_idx].count == 1
+      :switch
+    else
+    ending_cup_idx
+    end
   end
 
   def render
@@ -51,16 +73,13 @@ class Board
   end
 
   def winner
-    player_1_cup = cup[6].count
-    player_2_cup = cup[13].count
-    if one_side_empty?
-      if player_1_cup > player2_cup
-        @name1
-      elsif player_2_cup > player_1_cup
-          @name2
-      else
-        "DRAW"
-      end
+    player1_count = @cups[6].count
+    player2_count = @cups[13].count
+
+    if player1_count == player2_count
+      :draw
+    else
+      player1_count > player2_count ? @name1 : @name2
     end
   end
 end
