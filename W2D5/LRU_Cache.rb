@@ -3,28 +3,28 @@ class LRUCache
 
   def initialize(amount)
     @amount = amount
-    @storage = []
+    @list = []
   end
 
   def count
-    @storage.length
+    @list.length
   end
 
-  def add(el)
-    if @storage.include?(el)
-      @storage.delete(el)
-      @storage << el
+  def add(item)
+    if @list.include?(el)
+      @list.delete(el)
+      @list << el
     elsif count >= amount
-      @storage.shift
-      @storage << el
+      @list.shift
+      @list << el
     else
-      @storage << el
+      @list << el
     end
 
   end
 
   def show
-    puts @storage
+    puts @list
   end
 
   private
